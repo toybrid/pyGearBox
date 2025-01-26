@@ -38,13 +38,13 @@ PyGearBox is designed to provide a seamless plugin discovery mechanism, making i
 `plugins` directory in below examples are available in PYTHONPATH
 
 Direct File Plugins:
-A plugin named simple_hello_world located as a standalone file in the plugin path:
+A plugin named `simple_hello_world` located as a standalone file in the plugin path:
 ```python
 plugins/
 └── simple_hello_world.py
 ```
 Package and Module Plugins:
-A plugin named advanced.greetings is part of a package:
+A plugin named `advanced.greetings` is part of a package:
 ```python
 plugins/
 └── advanced/
