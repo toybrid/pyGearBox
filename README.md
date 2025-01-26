@@ -52,3 +52,35 @@ plugins/
     └── greetings.py
 ```
 In this case, the plugin is referenced as advanced.greetings during initialization.
+
+## Example Plugins
+
+**Minimal Plugin**
+
+```python
+from pyGearBox.plugin import PyGearBoxBasePlugin
+
+class PyGearBoxPlugin(PyGearBoxBasePlugin):
+    def __init__(self):
+        super().__init__()
+
+    def run(self):
+        print("Hello, World!")
+
+    @property
+    def name(self):
+        return self.__class__.__name__
+
+    @property
+    def plugin_type(self):
+        return 'publisher'
+```
+
+## Plugin Features
+You can implement the below methods on the plugin to implement code execution at different stages of plugin management
+
+- **on_load:** Executed when the plugin is loaded, used for initialization tasks.
+- **on_unload:** Executed when the plugin is unloaded, used for cleanup tasks.
+- **pre_run:** Executed before the main run function, used for setup or pre-processing.
+- **post_run:** Executed after the main run function, used for teardown or post-processing.
+- **run:** The main function of the plugin, where its core functionality is implemented.
