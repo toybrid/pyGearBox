@@ -8,13 +8,13 @@ from pyGearBox.executors import LinearExecutor
 
 
 @dataclass
-class PluginManifest:
+class PyGearBoxMaifest:
     name: str
     arguments: Optional[Dict] = None
 
 
 class PyGearBox:
-    def __init__(self, manifests: List[PluginManifest]=None):
+    def __init__(self, manifests: List[PyGearBoxMaifest]=None):
         self._manifests = manifests
         self._loaded_plugins= []
         self._load_result = {}
@@ -28,7 +28,7 @@ class PyGearBox:
                 log.error(f"Error unloading plugin {plugin.instance.name}: {e}")
                 raise PluginUnLoadError(f"Failed to unload plugin: {plugin.instance.name}")
                 
-    def load_plugin(self, plugin_manifest: PluginManifest):
+    def load_plugin(self, plugin_manifest: PyGearBoxMaifest):
         """
         Loads a plugin based on the provided plugin manifest.
 
@@ -37,7 +37,7 @@ class PyGearBox:
         If invalid, records the failure and raises a PluginLoadError.
 
         Args:
-            plugin_manifest (PluginManifest): The manifest containing plugin metadata and arguments.
+            plugin_manifest (PyGearBoxMaifest): The manifest containing plugin metadata and arguments.
 
         Returns:
             Runnable: The runnable instance wrapping the loaded plugin.

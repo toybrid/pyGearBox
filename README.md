@@ -12,13 +12,13 @@
 Below is an example of how to use PyGearBox to manage and execute plugins in your Python application:
 
 ```python
-from pyGearBox.manager import PyGearBox, PluginManifest
+from pyGearBox.manager import PyGearBox, PyGearBoxManifest
 
 # Initialize the plugin manager
 gearbox = PyGearBox()
 
 # Run the 'simple_hello_world' plugin
-simple_plugin = PluginManifest(name='simple_hello_world')
+simple_plugin = PyGearBoxManifest(name='simple_hello_world')
 plugin = gearbox.load_plugin(simple_plugin)
 gearbox.run_plugin(plugin)
 
@@ -27,7 +27,7 @@ gearbox.run_plugin(plugin)
 >> Running: Hello, World!
 
 # # Run the 'arg_print' plugin with an argument
-arg_plugin = PluginManifest(name='arg_print', arguments={'custom': 'Hello', 'value': 'World! from arg'})
+arg_plugin = PyGearBoxManifest(name='arg_print', arguments={'custom': 'Hello', 'value': 'World! from arg'})
 plugin = gearbox.load_plugin(arg_plugin)
 gearbox.run_plugin(plugin)
 
@@ -42,8 +42,8 @@ gearbox.run_plugins()
 ```python
 
 plugin_list = [
-        PluginManifest(name='simple_hello_world'),
-        PluginManifest(name='arg_print', arguments={'custom': 'Hello', 'value': 'World! from arg'})
+        PyGearBoxManifest(name='simple_hello_world'),
+        PyGearBoxManifest(name='arg_print', arguments={'custom': 'Hello', 'value': 'World! from arg'})
     ]
 
 gearbox = PyGearBox(manifests=plugin_list)

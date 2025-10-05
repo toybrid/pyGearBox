@@ -4,6 +4,13 @@ from dataclasses import dataclass
 
 @dataclass
 class Runnable:
+    """
+    A class representing a runnable entity with associated instance and arguments.
+
+    Attributes:
+        instance (object): The instance to be run.
+        arguments (Optional[Dict]): Optional dictionary of arguments for the runnable instance.
+    """
     instance: object
     arguments: Optional[Dict] = None
 
@@ -24,10 +31,11 @@ class Status:
     
 class ErrorSafety(Enum):
     """
-    Enum class to represent error safety levels.
+    An enumeration that defines error handling strategies.
+
     Attributes:
-        SAFE: Indicates that the operation is safe and can proceed without issues.
-        UNSAFE: Indicates that the operation is unsafe and may lead to issues.
+        CONTINUE (int): Indicates that execution should continue after an error.
+        ABORT (int): Indicates that execution should abort upon encountering an error.
     """
     CONTINUE = 0
     ABORT = 1
