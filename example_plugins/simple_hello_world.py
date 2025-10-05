@@ -4,19 +4,13 @@ class PyGearBoxPlugin(PyGearBoxBasePlugin):
     def __init__(self):
         super().__init__()
 
-    def on_load(self):
-        print(self.name + " loaded")
-
-    def on_unload(self):
-        print(self.name + " exited")
-
     def run(self):
-        print("Hello, World!")
+        print("Running: Hello, World!")
 
     @property
     def name(self):
-        return self.__class__.__name__
+        return f'simple_hello_world'
 
     @property
-    def plugin_type(self):
-        return 'publisher'
+    def version(self):
+        return '0.0.1'

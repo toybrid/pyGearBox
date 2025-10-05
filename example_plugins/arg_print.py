@@ -1,22 +1,19 @@
+import time
 from pyGearBox.plugin import PyGearBoxBasePlugin
 
 class PyGearBoxPlugin(PyGearBoxBasePlugin):
     def __init__(self):
         super().__init__()
 
-    def on_load(self):
-        print(self.name + " loaded")
-
-    def on_unload(self):
-        print(self.name + " exited")
-
-    def run(self, value):
-        print(value)
+    def run(self, custom, value):
+        # time.sleep(3)
+        print("Running arg_print plugin")
+        print(custom, value)
 
     @property
     def name(self):
-        return 'Argument Printer'
+        return f'arg_print'
 
     @property
-    def plugin_type(self):
-        return 'publisher'
+    def version(self):
+        return '0.1.0'

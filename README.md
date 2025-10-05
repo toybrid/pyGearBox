@@ -7,29 +7,47 @@
 - **Customizable Plugins:** Extend your application by creating custom plugins tailored to your needs.
 - **Lightweight and Fast:** Minimal performance overhead, designed with efficiency in mind.
 - **Community-Driven:** Fully open source, welcoming contributions and feedback from developers worldwide.
+- **Task Executor** Ability to scale different types of processing like threaded, parallel, async etc
 ## Example Usage
 Below is an example of how to use PyGearBox to manage and execute plugins in your Python application:
 
 ```python
-from pyGearBox.manager import PyGearBox
+from pyGearBox.manager import PyGearBox, PluginManifest
 
-# Define a list of plugins to be loaded
-plugin_list = [
-    'simple_hello_world',  # A plugin that prints a simple message
-    'arg_print'            # A plugin that prints a message passed as an argument
-]
-
-# Initialize the plugin manager with the list of plugins
-gearbox = PyGearBox(plugin_list)
-
-# Load the plugins
-gearbox.load_plugins()
+# Initialize the plugin manager
+gearbox = PyGearBox()
 
 # Run the 'simple_hello_world' plugin
-gearbox.run_plugin('simple_hello_world')
+simple_plugin = PluginManifest(name='simple_hello_world')
+plugin = gearbox.load_plugin(simple_plugin)
+gearbox.run_plugin(plugin)
 
-# Run the 'arg_print' plugin with an argument
-gearbox.run_plugin('arg_print', 'Hello, World! from arg')
+# Results
+>> simple_hello_world loaded
+>> Running: Hello, World!
+
+# # Run the 'arg_print' plugin with an argument
+arg_plugin = PluginManifest(name='arg_print', arguments={'custom': 'Hello', 'value': 'World! from arg'})
+plugin = gearbox.load_plugin(arg_plugin)
+gearbox.run_plugin(plugin)
+
+# Results
+>> arg_print loaded
+>> Running arg_print plugin
+>> Hello World! from arg
+
+gearbox.run_plugins()
+```
+# Run All Plugins
+```python
+
+plugin_list = [
+        PluginManifest(name='simple_hello_world'),
+        PluginManifest(name='arg_print', arguments={'custom': 'Hello', 'value': 'World! from arg'})
+    ]
+
+gearbox = PyGearBox(manifests=plugin_list)
+gearbox.run_plugins()
 ```
 ## Plugin Discovery in PyGearBox
 PyGearBox is designed to provide a seamless plugin discovery mechanism, making it easy for developers to load plugins dynamically. Here's how the plugin discovery process works:
@@ -72,9 +90,14 @@ class PyGearBoxPlugin(PyGearBoxBasePlugin):
         return self.__class__.__name__
 
     @property
-    def plugin_type(self):
-        return 'publisher'
+    def version(self):
+        return '1.0.2'
 ```
+
+## Task Executor
+
+**Linear Executor**
+- Simple task / process executor, runs one after the other in a for loop
 
 ## Plugin Features
 You can implement the below methods on the plugin to implement code execution at different stages of plugin management
@@ -84,3 +107,13 @@ You can implement the below methods on the plugin to implement code execution at
 - **pre_run:** Executed before the main run function, used for setup or pre-processing.
 - **post_run:** Executed after the main run function, used for teardown or post-processing.
 - **run:** The main function of the plugin, where its core functionality is implemented.
+
+## Upcoming Features
+
+**Parallel Executor (WIP / Future)**
+- execute task / process executor, in parallel prcosses 
+- Use python `ProcessPoolExecutor`
+
+**Async Executor (WIP / Future)**
+- execute task / process executor, in asyncronised manner
+- Use python native async

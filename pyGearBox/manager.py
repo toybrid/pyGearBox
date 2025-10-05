@@ -1,0 +1,136 @@
+from typing import List, Dict, Optional
+from dataclasses import dataclass
+from importlib import import_module
+import logging as log
+
+from pyGearBox.utils import ErrorSafety, Status, PluginLoadError, PluginUnLoadError, Runnable, PluginExecutionError
+from pyGearBox.executors import LinearExecutor
+
+
+@dataclass
+class PluginManifest:
+    name: str
+    arguments: Optional[Dict] = None
+
+
+class PyGearBox:
+    def __init__(self, manifests: List[PluginManifest]=None):
+        self._manifests = manifests
+        self._loaded_plugins= []
+        self._load_result = {}
+        self._result = {}
+
+    def __del__(self):
+        for plugin in self.loaded_plugins:
+            try:
+                plugin.instance.on_unload()
+            except Exception as e:
+                log.error(f"Error unloading plugin {plugin.instance.name}: {e}")
+                raise PluginUnLoadError(f"Failed to unload plugin: {plugin.instance.name}")
+                
+    def load_plugin(self, plugin_manifest: PluginManifest):
+        """
+        Loads a plugin based on the provided plugin manifest.
+
+        Imports the plugin module, instantiates the plugin class, and validates it using its `is_valid` method.
+        If valid, calls the plugin's `on_load` method, wraps it in a Runnable, and adds it to the list of loaded plugins.
+        If invalid, records the failure and raises a PluginLoadError.
+
+        Args:
+            plugin_manifest (PluginManifest): The manifest containing plugin metadata and arguments.
+
+        Returns:
+            Runnable: The runnable instance wrapping the loaded plugin.
+
+        Raises:
+            PluginLoadError: If the plugin fails validation or cannot be loaded.
+        """
+        imported_module = import_module(plugin_manifest.name)
+        plugin_instance = imported_module.PyGearBoxPlugin()
+        if hasattr(plugin_instance, "is_valid") and plugin_instance.is_valid():
+            plugin_instance.on_load()
+            runnable = Runnable(instance=plugin_instance, arguments=plugin_manifest.arguments)
+            self._loaded_plugins.append(runnable)
+            return runnable
+        else:
+            self._load_result[plugin_manifest.name] = Status(1, "Invalid plugin")
+            raise PluginLoadError(f"Failed to load plugin: {plugin_manifest.name}")
+
+
+    def load_plugins(self):
+        """
+        Loads plugins based on the provided manifests.
+        Iterates through each plugin manifest in `self._manifests`, loads the plugin using
+        `load_plugin`, and updates the `_load_result` dictionary with the plugin name and a
+        success status. Raises a ValueError if no plugin manifests are provided.
+        Raises:
+            ValueError: If `self._manifests` is None.
+        """
+        if self._manifests is None:
+            raise ValueError("No plugin manifests provided")
+        
+        for plugin_manifest in self._manifests:
+            runnable = self.load_plugin(plugin_manifest)
+            self._load_result[plugin_manifest.name] = Status(0, "SUCCESS")
+
+    def run_plugin(self, plugin: object) -> Status:
+        """
+        Executes the specified plugin by calling its pre_run, run, and post_run methods.
+
+        Args:
+            plugin (object): The plugin object to execute. It should have an 'instance' attribute
+                with 'pre_run', 'run', and 'post_run' methods, as well as 'arguments', 'name',
+                and 'error_safety' attributes.
+
+        Returns:
+            Status: A Status object indicating the result of the plugin execution.
+
+        Raises:
+            PluginExecutionError: If the plugin execution fails and its error_safety is set to ABORT.
+        """
+        try:
+            plugin.instance.pre_run()
+            plugin.instance.run(**plugin.arguments or {})
+            plugin.instance.post_run()
+            stat = Status(0, f"Successfully ran plugin '{plugin}'")
+        except Exception as e:
+            stat = Status(2, str(e))
+            self._result[plugin.instance.name] = stat
+            if plugin.instance.error_safety == ErrorSafety.ABORT:
+                raise PluginExecutionError(f"Failed to run plugin '{plugin}': {e}")
+
+        return stat
+
+    def run_plugins(self, executor = LinearExecutor()):
+        """
+        Executes all loaded plugins using the specified executor.
+
+        Args:
+            executor (Executor, optional): The executor instance to use for running plugins.
+                Defaults to LinearExecutor().
+
+        Returns:
+            None
+        """
+        self.load_plugins()
+        executor.execute(self.loaded_plugins, self.run_plugin)
+
+    @property
+    def loaded_plugins(self) -> Dict[str, object]:
+        """
+        Returns a dictionary of currently loaded plugins.
+
+        Returns:
+            Dict[str, object]: A dictionary where the keys are plugin names and the values are plugin instances.
+        """
+        return self._loaded_plugins
+
+    @property
+    def result(self) -> Dict[str, Status]:
+        """
+        Returns the result dictionary containing status information.
+
+        Returns:
+            Dict[str, Status]: A dictionary mapping string keys to Status objects.
+        """
+        return self._result
