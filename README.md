@@ -1,6 +1,11 @@
 # pyGearBox
 **PyGearBox** is a powerful, lightweight, and user-friendly plugin manager designed for Python applications. It enables developers to modularize their code by dynamically loading and executing plugins. With PyGearBox, developers can build highly extensible systems that allow easy integration of additional features without modifying the core application logic.
 
+## Installaion
+```shell
+pip install pyGearBox
+```
+
 ## Key Features
 - **Dynamic Plugin Loading:** Load plugins at runtime, reducing code complexity and improving modularity.
 - **Easy-to-Use API:** Simple and intuitive methods for loading and executing plugins.
