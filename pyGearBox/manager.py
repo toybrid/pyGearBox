@@ -1,9 +1,14 @@
 from typing import List, Dict, Optional
 from dataclasses import dataclass
 from importlib import import_module
-import logging as log
 
-from pyGearBox.utils import ErrorSafety, Status, PluginLoadError, PluginUnLoadError, Runnable, PluginExecutionError
+from pyGearBox.utils import (
+    ErrorSafety,
+    Status,
+    PluginUnLoadError,
+    Runnable,
+    PluginExecutionError,
+)
 from pyGearBox.executors import LinearExecutor
 
 
@@ -14,20 +19,25 @@ class PyGearBoxMaifest:
 
 
 class PyGearBox:
-    def __init__(self, manifests: List[PyGearBoxMaifest]=None):
-        self._manifests = manifests
-        self._loaded_plugins= []
+    def __init__(self):
+        self._loaded_plugins = []
         self._load_result = {}
+        self._unload_result = {}
         self._result = {}
 
     def __del__(self):
         for plugin in self.loaded_plugins:
             try:
-                plugin.instance.on_unload()
+                if hasattr(plugin.instance, "on_unload"):
+                    plugin.instance.on_unload()
             except Exception as e:
-                log.error(f"Error unloading plugin {plugin.instance.name}: {e}")
-                raise PluginUnLoadError(f"Failed to unload plugin: {plugin.instance.name}")
-                
+                stat = Status(2, str(e), plugin)
+                self._unload_result[plugin.instance.name] = stat
+                if plugin.instance.error_safety == ErrorSafety.ABORT:
+                    raise PluginUnLoadError(
+                        f"Failed to unload plugin: {plugin.instance.name}"
+                    )
+
     def load_plugin(self, plugin_manifest: PyGearBoxMaifest):
         """
         Loads a plugin based on the provided plugin manifest.
@@ -47,17 +57,15 @@ class PyGearBox:
         """
         imported_module = import_module(plugin_manifest.name)
         plugin_instance = imported_module.PyGearBoxPlugin()
-        if hasattr(plugin_instance, "is_valid") and plugin_instance.is_valid():
+        if hasattr(plugin_instance, "on_load"):
             plugin_instance.on_load()
-            runnable = Runnable(instance=plugin_instance, arguments=plugin_manifest.arguments)
-            self._loaded_plugins.append(runnable)
-            return runnable
-        else:
-            self._load_result[plugin_manifest.name] = Status(1, "Invalid plugin")
-            raise PluginLoadError(f"Failed to load plugin: {plugin_manifest.name}")
+        runnable = Runnable(
+            instance=plugin_instance, arguments=plugin_manifest.arguments
+        )
+        self._loaded_plugins.append(runnable)
+        return runnable
 
-
-    def load_plugins(self):
+    def load_plugins(self, manifests: List[PyGearBoxMaifest]):
         """
         Loads plugins based on the provided manifests.
         Iterates through each plugin manifest in `self._manifests`, loads the plugin using
@@ -66,12 +74,13 @@ class PyGearBox:
         Raises:
             ValueError: If `self._manifests` is None.
         """
-        if self._manifests is None:
-            raise ValueError("No plugin manifests provided")
-        
-        for plugin_manifest in self._manifests:
-            runnable = self.load_plugin(plugin_manifest)
-            self._load_result[plugin_manifest.name] = Status(0, "SUCCESS")
+
+        for plugin_manifest in manifests:
+            self.load_plugin(plugin_manifest)
+            if plugin_manifest.name not in self._load_result.keys():
+                self._load_result[plugin_manifest.name] = Status(
+                    0, "SUCCESS", plugin_manifest
+                )
 
     def run_plugin(self, plugin: object) -> Status:
         """
@@ -89,19 +98,29 @@ class PyGearBox:
             PluginExecutionError: If the plugin execution fails and its error_safety is set to ABORT.
         """
         try:
-            plugin.instance.pre_run()
+            if hasattr(plugin.instance, "pre_run"):
+                plugin.instance.pre_run()
+
             plugin.instance.run(**plugin.arguments or {})
-            plugin.instance.post_run()
-            stat = Status(0, f"Successfully ran plugin '{plugin}'")
+
+            if hasattr(plugin.instance, "post_run"):
+                plugin.instance.post_run()
+
+            stat = Status(0, "SUCCESS", plugin.instance)
+            if plugin.instance.name not in self._result.keys():
+                self._result[plugin.instance.name] = stat
+                print("its here-----------")
+                print(self._result)
         except Exception as e:
-            stat = Status(2, str(e))
-            self._result[plugin.instance.name] = stat
+            stat = Status(2, f"Error: {e}", plugin)
+            if plugin.instance.name not in self._result.keys():
+                self._result[plugin.instance.name] = stat
             if plugin.instance.error_safety == ErrorSafety.ABORT:
                 raise PluginExecutionError(f"Failed to run plugin '{plugin}': {e}")
 
         return stat
 
-    def run_plugins(self, executor = LinearExecutor()):
+    def run_plugins(self, executor=LinearExecutor()):
         """
         Executes all loaded plugins using the specified executor.
 
@@ -112,7 +131,6 @@ class PyGearBox:
         Returns:
             None
         """
-        self.load_plugins()
         executor.execute(self.loaded_plugins, self.run_plugin)
 
     @property

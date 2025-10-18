@@ -1,11 +1,6 @@
 # pyGearBox
 **PyGearBox** is a powerful, lightweight, and user-friendly plugin manager designed for Python applications. It enables developers to modularize their code by dynamically loading and executing plugins. With PyGearBox, developers can build highly extensible systems that allow easy integration of additional features without modifying the core application logic.
 
-## Installaion
-```shell
-pip install pyGearBox
-```
-
 ## Key Features
 - **Dynamic Plugin Loading:** Load plugins at runtime, reducing code complexity and improving modularity.
 - **Easy-to-Use API:** Simple and intuitive methods for loading and executing plugins.
@@ -42,16 +37,25 @@ gearbox.run_plugin(plugin)
 >> Hello World! from arg
 
 gearbox.run_plugins()
+
+for i in gearbox.result:
+    print(gearbox.result[i])
+
+>> Status(code=0, message="Successfully ran plugin 'Runnable(instance=<simple_hello_world.PyGearBoxPlugin object at 0x1049c4510>, arguments=None)'")
+>> Status(code=0, message="Successfully ran plugin 'Runnable(instance=<arg_print.PyGearBoxPlugin object at 0x104cce210>, arguments={'custom': 'Hello', 'value': 'World! from arg'})'")
 ```
 # Run All Plugins
 ```python
 
 plugin_list = [
-        PyGearBoxManifest(name='simple_hello_world'),
-        PyGearBoxManifest(name='arg_print', arguments={'custom': 'Hello', 'value': 'World! from arg'})
+        PyGearBoxMaifest(name="simple_hello_world"),
+        PyGearBoxMaifest(
+            name="arg_print", arguments={"custom": "Hello", "value": "World! from arg"}
+        ),
     ]
 
-gearbox = PyGearBox(manifests=plugin_list)
+gearbox = PyGearBox()
+gearbox.load_plugins(plugin_list)
 gearbox.run_plugins()
 ```
 ## Plugin Discovery in PyGearBox
@@ -122,3 +126,6 @@ You can implement the below methods on the plugin to implement code execution at
 **Async Executor (WIP / Future)**
 - execute task / process executor, in asyncronised manner
 - Use python native async
+
+**Custom directory plugin discovery**
+- Currently plugin discovery is based on PYTHONATH will introduce custom directory based plugin discovery

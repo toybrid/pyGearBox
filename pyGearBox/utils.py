@@ -1,6 +1,7 @@
-from typing import Optional, Dict
+from typing import Optional, Dict, Any
 from enum import Enum
 from dataclasses import dataclass
+
 
 @dataclass
 class Runnable:
@@ -11,6 +12,7 @@ class Runnable:
         instance (object): The instance to be run.
         arguments (Optional[Dict]): Optional dictionary of arguments for the runnable instance.
     """
+
     instance: object
     arguments: Optional[Dict] = None
 
@@ -23,12 +25,12 @@ class Status:
         code (int): Status code (0: success, 1: warning, 2: error).
         message (str): Status message.
     """
+
     code: int = 0
     message: str = "SUCCESS"
+    entity: Any = None
 
-    def __str__(self):
-        return f'Status(code={self.code}, message="{self.message}")'
-    
+
 class ErrorSafety(Enum):
     """
     An enumeration that defines error handling strategies.
@@ -37,6 +39,7 @@ class ErrorSafety(Enum):
         CONTINUE (int): Indicates that execution should continue after an error.
         ABORT (int): Indicates that execution should abort upon encountering an error.
     """
+
     CONTINUE = 0
     ABORT = 1
 
@@ -47,26 +50,29 @@ class PluginLoadError(Exception):
     Attributes:
         message (str): Error message.
     """
+
     def __init__(self, message: str):
         super().__init__(message)
         self.message = message
 
     def __str__(self):
-        return f'PluginLoadError: {self.message}'
-    
+        return f"PluginLoadError: {self.message}"
+
+
 class PluginUnLoadError(Exception):
     """
     Custom exception for plugin loading errors.
     Attributes:
         message (str): Error message.
     """
+
     def __init__(self, message: str):
         super().__init__(message)
         self.message = message
 
     def __str__(self):
-        return f'PluginLoadError: {self.message}'
-    
+        return f"PluginLoadError: {self.message}"
+
 
 class PluginExecutionError(Exception):
     """
@@ -74,9 +80,10 @@ class PluginExecutionError(Exception):
     Attributes:
         message (str): Error message.
     """
+
     def __init__(self, message: str):
         super().__init__(message)
         self.message = message
 
     def __str__(self):
-        return f'PluginLoadError: {self.message}'
+        return f"PluginLoadError: {self.message}"

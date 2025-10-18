@@ -1,7 +1,7 @@
-from typing import Any, Callable, Dict, List, Optional
+from typing import Callable, List
 from abc import ABC, abstractmethod
-from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 from pyGearBox.utils import Runnable
+
 
 class BaseExecutor(ABC):
     """
@@ -14,7 +14,6 @@ class BaseExecutor(ABC):
 
 
 class LinearExecutor(BaseExecutor):
-
     def __init__(self):
         super().__init__()
 
