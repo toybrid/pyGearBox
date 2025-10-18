@@ -8,6 +8,7 @@
 - **Lightweight and Fast:** Minimal performance overhead, designed with efficiency in mind.
 - **Community-Driven:** Fully open source, welcoming contributions and feedback from developers worldwide.
 - **Task Executor** Ability to scale different types of processing like threaded, parallel, async etc
+- **Plugin Interfaces** Interface based desgn for plugin instead of inheritance
 ## Example Usage
 Below is an example of how to use PyGearBox to manage and execute plugins in your Python application:
 
