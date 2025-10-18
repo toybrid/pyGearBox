@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="pygearbox",  # Package name
-    version="1.1.0",  # Initial version
+    version="1.1.1",  # Initial version
     author="Arjun Thekkumadathil",
     author_email="arjun@toybrid.com",
     description="PyGearBox is a powerful, lightweight, and user-friendly plugin manager designed for Python applications",
