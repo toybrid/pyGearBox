@@ -18,6 +18,7 @@
 ## Example Usage
 Below is an example of how to use PyGearBox to manage and execute plugins in your Python application:
 
+### Running a single plugin
 ```python
 from pyGearBox.manager import PyGearBox, PyGearBoxManifest
 
@@ -32,7 +33,9 @@ gearbox.run_plugin(plugin)
 # Results
 >> simple_hello_world loaded
 >> Running: Hello, World!
-
+```
+### Running a single plugin with argument
+```
 # # Run the 'arg_print' plugin with an argument
 arg_plugin = PyGearBoxManifest(name='arg_print', arguments={'custom': 'Hello', 'value': 'World! from arg'})
 plugin = gearbox.load_plugin(arg_plugin)
@@ -51,7 +54,7 @@ for i in gearbox.result:
 >> Status(code=0, message="Successfully ran plugin 'Runnable(instance=<simple_hello_world.PyGearBoxPlugin object at 0x1049c4510>, arguments=None)'")
 >> Status(code=0, message="Successfully ran plugin 'Runnable(instance=<arg_print.PyGearBoxPlugin object at 0x104cce210>, arguments={'custom': 'Hello', 'value': 'World! from arg'})'")
 ```
-# Run All Plugins
+### Run All Plugins
 ```python
 
 plugin_list = [
@@ -92,22 +95,17 @@ In this case, the plugin is referenced as advanced.greetings during initializati
 **Minimal Plugin**
 
 ```python
-from pyGearBox.plugin import PyGearBoxBasePlugin
+from pyGearBox.utils import ErrorSafety
 
-class PyGearBoxPlugin(PyGearBoxBasePlugin):
-    def __init__(self):
-        super().__init__()
+
+class PyGearBoxPlugin:
 
     def run(self):
         print("Hello, World!")
 
     @property
-    def name(self):
-        return self.__class__.__name__
-
-    @property
-    def version(self):
-        return '1.0.2'
+    def error_saftey():
+        return ErrorSafety.CONTINUE
 ```
 
 ## Task Executor
