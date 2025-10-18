@@ -130,3 +130,6 @@ You can implement the below methods on the plugin to implement code execution at
 
 **Custom directory plugin discovery**
 - Currently plugin discovery is based on PYTHONATH will introduce custom directory based plugin discovery
+
+## Credits
+- Executors are inspired by some work done by Sharad Pai at 88 Pictures
