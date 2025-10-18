@@ -1,3 +1,9 @@
+<p align="left">
+  <a href="https://buymeacoffee.com/cgarjun">
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" height="50" alt="Buy Me A Coffee">
+  </a>
+</p>
+
 # pyGearBox
 **PyGearBox** is a powerful, lightweight, and user-friendly plugin manager designed for Python applications. It enables developers to modularize their code by dynamically loading and executing plugins. With PyGearBox, developers can build highly extensible systems that allow easy integration of additional features without modifying the core application logic.
 
