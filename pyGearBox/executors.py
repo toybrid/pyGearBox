@@ -1,22 +1,19 @@
 from typing import Callable, List
-from abc import ABC, abstractmethod
+from typing import Protocol
 from pyGearBox.utils import Runnable
 
 
-class BaseExecutor(ABC):
+class BaseExecutor(Protocol):
     """
-    Abstract base class for plugin executors.
+    Abstract interface for executors in the pyGearBox framework.
+    Executors are responsible for managing the execution of a list of Runnable objects.
     """
 
-    @abstractmethod
     def execute(self, runnables: List[Runnable], runner: Callable):
         pass
 
 
-class LinearExecutor(BaseExecutor):
-    def __init__(self):
-        super().__init__()
-
+class LinearExecutor:
     def execute(self, runnables: List[Runnable], runner: Callable):
         """
         Executes a list of Runnable objects using the provided runner function.

@@ -17,15 +17,7 @@ author = 'Arjun Thekkumadathil'
 
 extensions = [
     'sphinx.ext.autodoc',
-    # 'sphinx.ext.napoleon',
-    # 'sphinx.ext.viewcode',
 ]
-# autodoc_default_options = {
-#     'members': True,
-#     'undoc-members': True,
-#     'private-members': True,
-#     'show-inheritance': True,
-# }
 
 templates_path = ['_templates']
 exclude_patterns = []
