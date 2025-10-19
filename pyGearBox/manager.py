@@ -13,7 +13,14 @@ from pyGearBox.executors import LinearExecutor
 
 
 @dataclass
-class PyGearBoxMaifest:
+class PyGearBoxManifest:
+    """
+    Represents the manifest for a PyGearBox component.
+
+    Attributes:
+        name (str): The name of the plugin.
+        arguments (Optional[Dict]): Optional dictionary of arguments associated with the plugin.
+    """
     name: str
     arguments: Optional[Dict] = None
 
@@ -26,6 +33,14 @@ class PyGearBox:
         self._result = {}
 
     def __del__(self):
+        """
+        Destructor method that attempts to unload all loaded plugins by calling their `on_unload` method if available.
+        If an exception occurs during the unloading of a plugin, it records the error status and, depending on the plugin's
+        error safety policy, may raise a `PluginUnLoadError` to abort the process.
+
+        Exceptions:
+            PluginUnLoadError: Raised if a plugin fails to unload and its error safety policy is set to ABORT.
+        """
         for plugin in self.loaded_plugins:
             try:
                 if hasattr(plugin.instance, "on_unload"):
@@ -38,7 +53,7 @@ class PyGearBox:
                         f"Failed to unload plugin: {plugin.instance.name}"
                     )
 
-    def load_plugin(self, plugin_manifest: PyGearBoxMaifest):
+    def load_plugin(self, plugin_manifest: PyGearBoxManifest):
         """
         Loads a plugin based on the provided plugin manifest.
 
@@ -47,7 +62,7 @@ class PyGearBox:
         If invalid, records the failure and raises a PluginLoadError.
 
         Args:
-            plugin_manifest (PyGearBoxMaifest): The manifest containing plugin metadata and arguments.
+            plugin_manifest (PyGearBoxManifest): The manifest containing plugin metadata and arguments.
 
         Returns:
             Runnable: The runnable instance wrapping the loaded plugin.
@@ -65,14 +80,20 @@ class PyGearBox:
         self._loaded_plugins.append(runnable)
         return runnable
 
-    def load_plugins(self, manifests: List[PyGearBoxMaifest]):
+    def load_plugins(self, manifests: List[PyGearBoxManifest])-> bool:
         """
-        Loads plugins based on the provided manifests.
-        Iterates through each plugin manifest in `self._manifests`, loads the plugin using
-        `load_plugin`, and updates the `_load_result` dictionary with the plugin name and a
-        success status. Raises a ValueError if no plugin manifests are provided.
-        Raises:
-            ValueError: If `self._manifests` is None.
+        Loads a list of plugins based on their manifests.
+
+        Iterates through the provided list of PyGearBoxManifest objects, loading each plugin
+        using the `load_plugin` method. After attempting to load each plugin, it checks if the
+        plugin's name is present in the `_load_result` dictionary. If not, it adds an entry
+        indicating a successful load.
+
+        Args:
+            manifests (List[PyGearBoxManifest]): A list of plugin manifest objects to load.
+
+        Returns:
+            bool: True if all plugins are processed.
         """
 
         for plugin_manifest in manifests:
@@ -81,6 +102,7 @@ class PyGearBox:
                 self._load_result[plugin_manifest.name] = Status(
                     0, "SUCCESS", plugin_manifest
                 )
+        return True
 
     def run_plugin(self, plugin: object) -> Status:
         """
@@ -109,8 +131,6 @@ class PyGearBox:
             stat = Status(0, "SUCCESS", plugin.instance)
             if plugin.instance.name not in self._result.keys():
                 self._result[plugin.instance.name] = stat
-                print("its here-----------")
-                print(self._result)
         except Exception as e:
             stat = Status(2, f"Error: {e}", plugin)
             if plugin.instance.name not in self._result.keys():
